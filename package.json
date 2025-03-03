@@ -3,8 +3,10 @@
   "version": "1.1.4",
   "description": "Inline SVGs in Svelte",
   "main": "dist/index.js",
+  "svelte": "src/inline-svg.svelte",
   "exports": {
     ".": {
+      "svelte": "./src/inline-svg.svelte",
       "require": "./dist/index.js",
       "import": "./dist/index.mjs"
     },

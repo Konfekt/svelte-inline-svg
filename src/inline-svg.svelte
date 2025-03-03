@@ -1,10 +1,29 @@
+<script context="module">
+  // Export an action for this component.
+  // When used as an action, the component is instantiated with 'new'
+  // and attached to the given node.
+  import InlineSVG from './inline-svg.svelte';
+  
+  export function inlineSVG(node, options) {
+    const instance = new InlineSVG({
+      target: node,
+      props: options
+    });
+    return {
+      destroy() {
+        instance.$destroy();
+      }
+    };
+  }
+</script>
+
 <script>
   import { onMount, createEventDispatcher, tick } from 'svelte'
-  import { get_current_component } from 'svelte/internal';
-  import { forwardEventsBuilder } from './utils/forwardEvents';
 
   const dispatch = createEventDispatcher()
-  const forwardEvents = forwardEventsBuilder(get_current_component());
+  export function forwardEvents(node) {
+    return {}; 
+  }
 
 
   export let src
