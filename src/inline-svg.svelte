@@ -18,25 +18,23 @@
 </script>
 
 <script>
-  import { onMount, createEventDispatcher, tick } from 'svelte'
+  import { tick } from 'svelte'
 
-  const dispatch = createEventDispatcher()
-  export function forwardEvents(node) {
-    return {}; 
-  }
+  let {
+		src,
+		transformSrc = (svg) => svg,
+		onloaded, 
+		...rest
+	} = $props();
 
-
-  export let src
-  export let transformSrc = (svg) => svg
-
-  onMount(() => {
-    inline(src)
-  })
+	$effect(() => {
+		inline(src);
+	})
 
   let cache = {}
   let isLoaded = false
-  let svgAttrs = {}
-  let svgContent
+  let svgAttrs = $state({})
+  let svgContent = $state()
 
   function filterAttrs(attrs) {
     return Object.keys(attrs).reduce((result, key) => {
@@ -111,7 +109,7 @@
         // render svg element
         await tick()
         isLoaded = true
-        dispatch('loaded')
+        onloaded?.();
       })
       .catch((error) => {
         // remove cached rejected promise so next image can try load again
@@ -121,11 +119,9 @@
   }
 </script>
 
-<svg
-  use:forwardEvents
-  xmlns="http://www.w3.org/2000/svg"
+<svg xmlns="http://www.w3.org/2000/svg"
   {...svgAttrs}
-  {...$$restProps}
+  {...rest}
 >
   {@html svgContent}
 </svg>
