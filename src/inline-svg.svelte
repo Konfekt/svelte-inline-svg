@@ -1,23 +1,21 @@
 <script>
-  import { onMount, createEventDispatcher, tick } from 'svelte'
-  import { get_current_component } from 'svelte/internal';
-  import { forwardEventsBuilder } from './utils/forwardEvents';
+  import { tick } from 'svelte'
 
-  const dispatch = createEventDispatcher()
-  const forwardEvents = forwardEventsBuilder(get_current_component());
+  let {
+		src,
+		transformSrc = (svg) => svg,
+		onloaded, 
+		...rest
+	} = $props();
 
-
-  export let src
-  export let transformSrc = (svg) => svg
-
-  onMount(() => {
-    inline(src)
-  })
+	$effect(() => {
+		inline(src);
+	})
 
   let cache = {}
   let isLoaded = false
-  let svgAttrs = {}
-  let svgContent
+  let svgAttrs = $state({})
+  let svgContent = $state()
 
   function filterAttrs(attrs) {
     return Object.keys(attrs).reduce((result, key) => {
@@ -69,17 +67,6 @@
 
   function inline(src) {
     // fill cache by src with promise
-    if (!cache[src]) {
-      // notify svg is unloaded
-      if (isLoaded) {
-        isLoaded = false
-        dispatch('unloaded')
-      }
-      // download
-      cache[src] = download(src)
-    }
-
-    // inline svg when cached promise resolves
     cache[src]
       .then(async (svg) => {
         // copy attrs
@@ -92,21 +79,18 @@
         // render svg element
         await tick()
         isLoaded = true
-        dispatch('loaded')
+        onloaded?.();
       })
       .catch((error) => {
-        // remove cached rejected promise so next image can try load again
         delete cache[src]
         console.error(error)
       })
   }
 </script>
 
-<svg
-  use:forwardEvents
-  xmlns="http://www.w3.org/2000/svg"
+<svg xmlns="http://www.w3.org/2000/svg"
   {...svgAttrs}
-  {...$$restProps}
+  {...rest}
 >
   {@html svgContent}
 </svg>
